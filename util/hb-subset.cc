@@ -1,6 +1,5 @@
 /*
- * Copyright © 2010  Behdad Esfahbod
- * Copyright © 2011,2012  Google, Inc.
+ * Copyright © 2018  Google, Inc.
  *
  *  This is part of HarfBuzz, a text shaping library.
  *
@@ -31,61 +30,49 @@
  * Command line interface to the harfbuzz font subsetter.
  */
 
-struct subset_consumer_t
+struct main_subset_t
 {
-  subset_consumer_t (option_parser_t *parser)
-      : failed (false), options(parser) {}
+  main_subset_t (void)
+      : options ("--font-file <a font> --unicodes <codepoints to retain>"),
+        subset_opts (&options) {}
 
-  void init (hb_buffer_t  *buffer_,
-             const font_options_t *font_opts)
+  int
+  main (int argc, char **argv)
   {
-    font = hb_font_reference (font_opts->get_font ());
+    options.parse (&argc, &argv);
+
+    argc--, argv++;
+    if (argc && !subset_opts.font_file) subset_opts.font_file = locale_to_utf8 (argv[0]), argc--, argv++;
+    if (argc)
+      fail (true, "Too many arguments on the command line");
+    if (!subset_opts.font_file)
+      options.usage ();
+
+    // TODO do something useful :)
+
+    //hb_buffer_t *buffer = hb_buffer_create ();
+    //consumer.init (buffer, &font_opts);
+    //hb_buffer_destroy (buffer);
+
+    /*unsigned int text_len;
+    const char *text;
+    while ((text = input.get_line (&text_len)))
+      consumer.consume_line (text, text_len, input.text_before, input.text_after);
+
+    consumer.finish (&font_opts);*/
+
+    //return consumer.failed ? 1 : 0;
+    return 0;
   }
 
-  void consume_line (const char   *text,
-                     unsigned int  text_len,
-                     const char   *text_before,
-                     const char   *text_after)
-  {
-  }
-
-  void finish (const font_options_t *font_opts)
-  {
-    hb_face_t *face = hb_font_get_face (font);
-    hb_blob_t *result = hb_face_reference_blob (face);
-    unsigned int data_length;
-    const char* data = hb_blob_get_data (result, &data_length);
-
-    int fd_out = open(options.output_file, O_CREAT | O_WRONLY, S_IRWXU);
-    if (fd_out != -1) {
-      ssize_t bytes_written = write(fd_out, data, data_length);
-      if (bytes_written == -1) {
-        fprintf(stderr, "Unable to write output file");
-        failed = true;
-      } else if (bytes_written != data_length) {
-        fprintf(stderr, "Wrong number of bytes written");
-        failed = true;
-      }
-    } else {
-      fprintf(stderr, "Unable to open output file");
-      failed = true;
-    }
-
-    hb_blob_destroy (result);
-    hb_font_destroy (font);
-  }
-
-  public:
-  bool failed;
-
-  private:
-  output_options_t options;
-  hb_font_t *font;
+  protected:
+  option_parser_t options;
+  subset_options_t subset_opts;
 };
 
 int
 main (int argc, char **argv)
 {
-  main_font_text_t<subset_consumer_t, 10, 0> driver;
+  main_subset_t driver;
   return driver.main (argc, argv);
 }

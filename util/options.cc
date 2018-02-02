@@ -571,6 +571,21 @@ text_options_t::add_options (option_parser_t *parser)
 }
 
 void
+subset_options_t::add_options (option_parser_t *parser)
+{
+  GOptionEntry entries[] =
+  {
+    {"font-file", 0, 0, G_OPTION_ARG_STRING,  &this->font_file,   "Set font file-name",     "filename"},
+    {nullptr}
+  };
+  parser->add_group (entries,
+         "subset",
+         "Subsetter options:",
+         "Options for the subsetter",
+         this);
+}
+
+void
 output_options_t::add_options (option_parser_t *parser)
 {
   const char *text;

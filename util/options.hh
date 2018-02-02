@@ -481,6 +481,30 @@ struct font_options_t : option_group_t
   mutable hb_font_t *font;
 };
 
+struct subset_options_t : option_group_t
+{
+  subset_options_t (option_parser_t *parser)
+  {
+    font_file = nullptr;
+    face = nullptr;
+
+    add_options (parser);
+  }
+  ~subset_options_t (void) {
+    g_free (font_file);
+    hb_face_destroy (face);
+  }
+
+  void add_options (option_parser_t *parser);
+
+  hb_face_t *get_face (void) const;
+
+  char *font_file;
+
+  private:
+  mutable hb_face_t *face;
+};
+
 
 struct text_options_t : option_group_t
 {
