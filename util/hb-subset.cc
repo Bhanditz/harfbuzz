@@ -33,8 +33,9 @@
 struct main_subset_t
 {
   main_subset_t (void)
-      : options ("--font-file <a font> --unicodes <codepoints to retain>"),
-        subset_opts (&options) {}
+      : options ("--font-file <a font> --output-file <file> --unicodes <codepoints to retain>"),
+        subset_opts (&options),
+        output_opts (&options) {}
 
   int
   main (int argc, char **argv)
@@ -68,6 +69,7 @@ struct main_subset_t
   protected:
   option_parser_t options;
   subset_options_t subset_opts;
+  output_options_t output_opts;
 };
 
 int
